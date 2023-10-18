@@ -1,12 +1,10 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <title>Leitor de QR Code</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
 </head>
-
 <body>
     <h1>Leitor de QR Code</h1>
     <div id="qr-reader"></div>
@@ -16,13 +14,11 @@
     <input type="text" id="uuidInput">
     <button id="verificarBtn">Verificar</button>
 
-    <button id="cameraBtn"
-        style="background-color: #007BFF; color: #fff; border: none; padding: 10px 15px; cursor: pointer;">
+    <button id="cameraBtn" style="background-color: #007BFF; color: #fff; border: none; padding: 10px 15px; cursor: pointer;">
         <i class="fas fa-camera"></i> Abrir Câmera
     </button>
 
-    <button id="gerarRelatorioBtn"
-        style="background-color: #28a745; color: #fff; border: none; padding: 10px 15px; cursor: pointer;">
+    <button id="gerarRelatorioBtn" style="background-color: #28a745; color: #fff; border: none; padding: 10px 15px; cursor: pointer;">
         Gerar Relatório
     </button>
 
@@ -61,7 +57,6 @@
                     const stream = await navigator.mediaDevices.getUserMedia({ video: facingMode });
                     qrCodeReader.srcObject = stream;
                     qrCodeReader.play().catch(error => console.error(error));
-                    lerQRCode();
                     isCameraOpen = true;
                     cameraBtn.innerHTML = '<i class="fas fa-camera-slash"></i> Fechar Câmera';
                 } catch (err) {
@@ -93,8 +88,8 @@
                 uuidArray[index].utilizado = true;
                 mensagemElement.innerHTML = 'ACESSO LIBERADO';
             }
-
-            uuidInput.value = '';
+            // Insira o valor lido no campo uuidInput
+            uuidInput.value = uuid;
         }
 
         function lerQRCode() {
@@ -149,5 +144,4 @@
         gerarRelatorioBtn.addEventListener('click', gerarRelatorioPDF);
     </script>
 </body>
-
 </html>
