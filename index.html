@@ -1,41 +1,35 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <title>Leitor de QR Code</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.0/css/all.min.css">
+    <!-- jsQR CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@2.0.0/dist/jsQR.min.js"></script>
+    <!-- html2pdf CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
 </head>
-
 <body>
     <h1>Leitor de QR Code</h1>
     <div id="qr-reader"></div>
     <p id="mensagem"></p>
-
+    
     <label for="uuidInput">Insira o UUID:</label>
     <input type="text" id="uuidInput">
+    <button id="verificarBtn">Verificar</button>
 
-    <button id="cameraBtn"
-        style="background-color: #007BFF; color: #fff; border: none; padding: 10px 15px; cursor: pointer;">
+    <!-- Botão para abrir/fechar a câmera -->
+    <button id="cameraBtn" style="background-color: #007BFF; color: #fff; border: none; padding: 10px 15px; cursor: pointer;">
         <i class="fas fa-camera"></i> Abrir Câmera
     </button>
 
-    <button id="verificarBtn"
-        style="background-color: #28a759; color: #fff; border: none; padding: 10px 15px; cursor: pointer; font-weight: 800;">
-        VERIFICAR
-    </button>
-
-    <button id="gerarRelatorioBtn"
-        style="background-color: #3b3b3b; color: #fff; border: none; padding: 10px 15px; cursor: pointer;">
+    <!-- Botão para gerar relatório em PDF -->
+    <button id="gerarRelatorioBtn" style="background-color: #28a745; color: #fff; border: none; padding: 10px 15px; cursor: pointer;">
         Gerar Relatório
     </button>
 
-    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.0.0/dist/jsQR.js"></script>
     <script>
-        const uuidArray = [
-            // Seus UUIDs aqui
-        ];
-
+        const uuidArray = [];
         let qrCodeReader = null;
         const uuidInput = document.getElementById('uuidInput');
         const mensagemElement = document.getElementById('mensagem');
@@ -44,25 +38,22 @@
         const gerarRelatorioBtn = document.getElementById('gerarRelatorioBtn');
         let isCameraOpen = false;
 
-        async function toggleCamera() {
+        function toggleCamera() {
             if (!isCameraOpen) {
-                const facingMode = { facingMode: "environment" }; // Forçar a câmera traseira
-
                 if (!qrCodeReader) {
                     qrCodeReader = document.createElement('video');
                     document.getElementById('qr-reader').appendChild(qrCodeReader);
                 }
 
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ video: facingMode });
-                    qrCodeReader.srcObject = stream;
-                    qrCodeReader.play().catch(error => console.error(error));
-                    lerQRCode();
-                    isCameraOpen = true;
-                    cameraBtn.innerHTML = '<i class="fas fa-camera-slash"></i> Fechar Câmera';
-                } catch (err) {
-                    console.error(err);
-                }
+                navigator.mediaDevices.getUserMedia({ video: true })
+                    .then(stream => {
+                        qrCodeReader.srcObject = stream;
+                        qrCodeReader.play().catch(error => console.error(error));
+                        lerQRCode();
+                        isCameraOpen = true;
+                        cameraBtn.innerHTML = '<i class="fas fa-camera-slash"></i> Fechar Câmera';
+                    })
+                    .catch(err => console.error(err));
             } else {
                 if (qrCodeReader) {
                     const stream = qrCodeReader.srcObject;
@@ -79,7 +70,18 @@
         }
 
         function verificarUUID(uuid) {
-            // Função de verificação de UUID
+            const index = uuidArray.findIndex(item => item.uuid === uuid);
+
+            if (index === -1) {
+                mensagemElement.innerHTML = 'NÃO ENCONTRADO';
+            } else if (uuidArray[index].utilizado) {
+                mensagemElement.innerHTML = 'INGRESSO JÁ UTILIZADO';
+            } else {
+                uuidArray[index].utilizado = true;
+                mensagemElement.innerHTML = 'ACESSO LIBERADO';
+            }
+
+            uuidInput.value = '';
         }
 
         function lerQRCode() {
@@ -101,9 +103,27 @@
             requestAnimationFrame(lerQRCode);
         }
 
+        function gerarRelatorioPDF() {
+            const element = document.getElementById('qr-reader'); // Elemento que você deseja converter para PDF
+            const pdfOptions = {
+                margin: 10,
+                filename: 'Relatorio.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+            };
+
+            html2pdf()
+                .from(element)
+                .set(pdfOptions)
+                .outputPdf(pdf => {
+                    pdf.save();
+                });
+        }
+
         cameraBtn.addEventListener('click', toggleCamera);
         verificarBtn.addEventListener('click', () => verificarUUID(uuidInput.value));
+        gerarRelatorioBtn.addEventListener('click', gerarRelatorioPDF);
     </script>
 </body>
-
 </html>
