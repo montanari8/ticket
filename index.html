@@ -33,23 +33,25 @@
         const gerarRelatorioBtn = document.getElementById('gerarRelatorioBtn');
         let isCameraOpen = false;
 
-        function toggleCamera() {
+        async function toggleCamera() {
             if (!isCameraOpen) {
-                   const facingMode = { facingMode: "environment" }; 
+                const facingMode = { facingMode: "environment" }; // Forçar a câmera traseira
+
                 if (!qrCodeReader) {
                     qrCodeReader = document.createElement('video');
                     document.getElementById('qr-reader').appendChild(qrCodeReader);
                 }
 
-                navigator.mediaDevices.getUserMedia({ video: true })
-                    .then(stream => {
-                        qrCodeReader.srcObject = stream;
-                        qrCodeReader.play().catch(error => console.error(error));
-                        lerQRCode();
-                        isCameraOpen = true;
-                        cameraBtn.innerHTML = '<i class="fas fa-camera-slash"></i> Fechar Câmera';
-                    })
-                    .catch(err => console.error(err));
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: facingMode });
+                    qrCodeReader.srcObject = stream;
+                    qrCodeReader.play().catch(error => console.error(error));
+                    lerQRCode();
+                    isCameraOpen = true;
+                    cameraBtn.innerHTML = '<i class="fas fa-camera-slash"></i> Fechar Câmera';
+                } catch (err) {
+                    console.error(err);
+                }
             } else {
                 if (qrCodeReader) {
                     const stream = qrCodeReader.srcObject;
