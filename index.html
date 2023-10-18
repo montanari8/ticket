@@ -35,6 +35,7 @@
 
         function toggleCamera() {
             if (!isCameraOpen) {
+                   const facingMode = { facingMode: "environment" }; 
                 if (!qrCodeReader) {
                     qrCodeReader = document.createElement('video');
                     document.getElementById('qr-reader').appendChild(qrCodeReader);
